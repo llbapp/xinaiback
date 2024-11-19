@@ -9,7 +9,7 @@ import pandas as pd
 import json
 from src.chat_session import Chatchain, periodic_cleanup, stats_context
 from src.data_processing_for_server import data_processor
-from src.config.config import select_num
+from src.config.config_copy import select_num
 from src.chatbot import AsyncMultiprocessChatbot
 import logging
 

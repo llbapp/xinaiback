@@ -8,7 +8,7 @@ from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_text_splitters import CharacterTextSplitter #用excel就不需要文本切割，如果后续加了文本的rag需要用到
 from langchain_core.documents.base import Document
 from FlagEmbedding import FlagReranker
-from src.config.config import (
+from src.config.config_copy import (
     embedding_path,
     embedding_model_name,
     doc_dir, qa_dir, xlsx_dir,
