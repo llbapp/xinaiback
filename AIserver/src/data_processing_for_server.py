@@ -8,7 +8,11 @@ from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_text_splitters import CharacterTextSplitter #用excel就不需要文本切割，如果后续加了文本的rag需要用到
 from langchain_core.documents.base import Document
 from FlagEmbedding import FlagReranker
+<<<<<<< Updated upstream
 from src.config.config_copy import (
+=======
+from src.config.config import (
+>>>>>>> Stashed changes
     embedding_path,
     embedding_model_name,
     doc_dir, qa_dir, xlsx_dir,
@@ -39,6 +43,12 @@ from src.config.config_copy import (
 
 
 class Singleton(type):
+<<<<<<< Updated upstream
+=======
+    '''
+    不知道是干什么用的，佬帮忙写的用于流式输出服务的
+    '''
+>>>>>>> Stashed changes
     _instances = {}
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
@@ -46,6 +56,12 @@ class Singleton(type):
         return cls._instances[cls]
 
 class Data_process_for_server(metaclass=Singleton):
+<<<<<<< Updated upstream
+=======
+    '''
+    包括rag的整个流程，获取用户提问并在向量库中匹配到合适的答案
+    '''
+>>>>>>> Stashed changes
     #auto run model loading...
     def __init__(self):
         self.embedding_model = None
@@ -55,13 +71,23 @@ class Data_process_for_server(metaclass=Singleton):
         
         # Load all models and data on initialization
         self.load_embedding_model()
+<<<<<<< Updated upstream
         # self.load_rerank_model()
+=======
+        # self.load_rerank_model()  因为在autodl上加载不出来rerank模型所以含泪砍掉
+>>>>>>> Stashed changes
         self.read_excel_to_dict()
         self.load_vector_db()
         
         logger.info("Data_process_for_server initialized with all models and data loaded.")
 
     def load_embedding_model(self, model_name=embedding_model_name, device='cpu', normalize_embeddings=True):
+<<<<<<< Updated upstream
+=======
+        '''
+        如果没有加载embedding模型，将首先下载模型，这里使用了两种方式，本地下载和线上下载，但是由于autodl无法访问huggingface，所以只能本地下载
+        '''
+>>>>>>> Stashed changes
         if self.embedding_model is None:
             if not os.path.exists(embedding_path):
                 os.makedirs(embedding_path, exist_ok=True)
@@ -74,6 +100,10 @@ class Data_process_for_server(metaclass=Singleton):
                         logger.info('Embedding model loaded from file.')
                 except Exception as e:
                     logger.error(f'Failed to load embedding model from {embedding_model_path}')
+<<<<<<< Updated upstream
+=======
+                    # 首先尝试加载本地模型，如果失败，则尝试访问huggingface下载模型
+>>>>>>> Stashed changes
             if self.embedding_model is None:
                 try:
                     self.embedding_model = HuggingFaceBgeEmbeddings(
@@ -87,6 +117,10 @@ class Data_process_for_server(metaclass=Singleton):
                     logger.error(f'Failed to load embedding model: {e}')
         return self.embedding_model
 
+<<<<<<< Updated upstream
+=======
+    # 由于autodl平台的一些奇怪bug，无法读取本地rerank模型，因此删去了所有rerank方法
+>>>>>>> Stashed changes
     # def load_rerank_model(self, model_name=rerank_model_name):
     #     if self.rerank_model is None:
     #         if not os.path.exists(rerank_path):
@@ -112,6 +146,13 @@ class Data_process_for_server(metaclass=Singleton):
     #     return self.rerank_model
 
     def read_excel_to_dict(self):
+<<<<<<< Updated upstream
+=======
+        '''
+        读取excel文件中的问答对写入字典，以用户提问为字典的键，AI回答为字典的值。
+        对于excel文件的rag逻辑是，通过匹配用户提问和问答对中的问题，找到相似的问题，输出该问题对应的答案
+        '''
+>>>>>>> Stashed changes
         if self.qa_dict is None:
             file_path = os.path.join(xlsx_dir, 'character.xlsx')
             try:
@@ -124,6 +165,12 @@ class Data_process_for_server(metaclass=Singleton):
         return self.qa_dict
 
     def save_question_to_list(self):
+<<<<<<< Updated upstream
+=======
+        '''
+        把问答对中的问题抽取出来形成列表，以便后续的向量化
+        '''
+>>>>>>> Stashed changes
         qa_dict = self.read_excel_to_dict()
         try:
             question_texts = list(qa_dict.keys())
@@ -134,12 +181,22 @@ class Data_process_for_server(metaclass=Singleton):
             return None
 
     def create_vector_db(self):
+<<<<<<< Updated upstream
+=======
+        '''
+        把问答对的问题向量化，形成向量库
+        '''
+>>>>>>> Stashed changes
         logger.info(f'Creating index...')
         emb_model = self.load_embedding_model()
         question_texts = self.save_question_to_list()
         documents = [Document(page_content=text) for text in question_texts]
         if question_texts is not None:
+<<<<<<< Updated upstream
             self.vector_db = FAISS.from_documents(documents, emb_model)
+=======
+            self.vector_db = FAISS.from_documents(documents, emb_model) # 通过文件和embedding模型生成向量库
+>>>>>>> Stashed changes
             try:
                 self.vector_db.save_local(vector_db_dir)
             except Exception as e:
@@ -147,6 +204,12 @@ class Data_process_for_server(metaclass=Singleton):
         return self.vector_db
 
     def load_vector_db(self):
+<<<<<<< Updated upstream
+=======
+        '''
+        加载向量库
+        '''
+>>>>>>> Stashed changes
         if self.vector_db is None:
             emb_model = self.load_embedding_model()
             if not os.path.exists(vector_db_dir) or not os.listdir(vector_db_dir):
@@ -156,10 +219,20 @@ class Data_process_for_server(metaclass=Singleton):
         return self.vector_db
 
     def retrieve(self, query, k):
+<<<<<<< Updated upstream
+=======
+        '''
+        匹配用户提问和向量库，寻回k个相似问题
+        '''
+>>>>>>> Stashed changes
         vector_db = self.load_vector_db()
         logger.info(f'Retrieving top {k} documents for query: {query}')
         retriever = vector_db.as_retriever(search_type="similarity", search_kwargs={"k": k})
         docs = retriever.invoke(query)
+<<<<<<< Updated upstream
+=======
+        # 生成一个与用户提问相似的问题列表
+>>>>>>> Stashed changes
         return docs
 
     # def rerank(self, query, docs, retrieval_num):
@@ -189,6 +262,7 @@ class Data_process_for_server(metaclass=Singleton):
 
     def return_answer(self, query, docs, retrieval_num):
         """
+<<<<<<< Updated upstream
         匹配排序后的文档，返回答案，并筛选score绝对值小于2的结果。
         """
         
@@ -198,6 +272,18 @@ class Data_process_for_server(metaclass=Singleton):
         qa_dict = self.read_excel_to_dict()
 
         # 筛选并返回答案
+=======
+        根据匹配的问题，返回答案
+        """
+        
+        # 获取相似问题
+        docs = self.retrieve(query, k=retrieval_num)
+        docs_with_scores = [doc.page_content.strip() for doc in docs] #其实因为没有重排序流程所以这里没有scores了
+        # 加载问答对
+        qa_dict = self.read_excel_to_dict()
+
+        # 筛选并返回答案，通过查询问题返回答案
+>>>>>>> Stashed changes
         matched_answers = []
         for doc in docs_with_scores:
             if doc in qa_dict:
@@ -213,8 +299,11 @@ class Data_process_for_server(metaclass=Singleton):
 
         return matched_answers
 
+<<<<<<< Updated upstream
 
 
+=======
+>>>>>>> Stashed changes
 # Initialize the singleton instance
 data_processor = Data_process_for_server()
 

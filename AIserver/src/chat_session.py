@@ -1,5 +1,6 @@
 from openai import OpenAI
 from src.data_processing_for_server import Data_process_for_server
+<<<<<<< Updated upstream
 from src.config.config_copy import (
     select_num, prompts
 )
@@ -12,11 +13,29 @@ from loguru import logger
 
 
 
+=======
+from src.config.config import (
+    select_num, prompts
+)
+from src.util.llm import load_llm, load_async_llm
+import time
+import logging
+from loguru import logger
+>>>>>>> Stashed changes
 import time
 from datetime import datetime
 import asyncio
 
+<<<<<<< Updated upstream
 class Chatchain():
+=======
+'''
+本文件用于将人设信息、rag检索信息、历史信息和用户提问整合起来，发送给llm，用类封装了几个函数，方便其他文件调用
+由于本人对日志实在不了解，所以下面日志部分基本是在瞎写，但是现在是可以输出的，虽然会输出一些没用的信息。有大佬比较懂可以帮忙修改一下
+'''
+
+class Chatchain(): # 创建了Chatchain类，主要用于构建整体对话
+>>>>>>> Stashed changes
     def __init__(self):
         self.chat_histories = {}  # 使用id区分用户编号，构建不同的上下文队列
         self.last_activity = {}  # 记录每个会话的最后活动时间
@@ -26,6 +45,12 @@ class Chatchain():
         
 
     def get_chat_history(self, user_id):
+<<<<<<< Updated upstream
+=======
+        '''
+        根据用户id获取历史上下文
+        '''
+>>>>>>> Stashed changes
         if user_id not in self.chat_histories:
             self.chat_histories[user_id] = []
             
@@ -33,14 +58,30 @@ class Chatchain():
     
 
     def create_chat_session(self, message, content, session_id, llm):
+<<<<<<< Updated upstream
         # 选择合适的llm
         openai, model = load_llm(llm)
         max_tokens = 100
+=======
+        '''
+        非流式输出时的对话
+        '''
+              
+        # 选择合适的llm
+        openai, model = load_llm(llm)
+        max_tokens = 100 
+>>>>>>> Stashed changes
         # 获取用户的历史对话
         user_history = self.get_chat_history(session_id)
         # 设置prompt和content的组合消息
         prompt = prompts.get(llm, "")  # 如果llm在prompts中没有配置，则默认为空字符串
+<<<<<<< Updated upstream
         system_content = f"{prompt}\n{content}"  # 使用格式化字符串拼接
+=======
+        system_content = f"{prompt}\n{content}"  # 系统prompt包括人设提示词和rag检索出的内容
+
+        current_model = None # 初始化模型变量
+>>>>>>> Stashed changes
 
         # 系统消息，只在第一次对话时添加
         if len(user_history) == 0:
@@ -49,12 +90,30 @@ class Chatchain():
                 "content": system_content
             }
             user_history.append(system_input)
+<<<<<<< Updated upstream
+=======
+            current_model = llm #记录当前模型
+        else:
+            # 如果模型发生变化，更新系统提示词
+            if current_model != llm:
+                # 替换历史记录中的系统提示词
+                user_history[0] = {
+                    "role": "system",
+                    "content": system_content
+                }
+                current_model = llm
+
+>>>>>>> Stashed changes
 
         # 用户输入
         user_input = {
             "role": "user",
             "content": message
         }
+<<<<<<< Updated upstream
+=======
+        # 记录历史信息
+>>>>>>> Stashed changes
         user_history.append(user_input)
 
         # 调用 OpenAI API 获取回复
@@ -70,7 +129,13 @@ class Chatchain():
             "role": "assistant",
             "content": reply
         }
+<<<<<<< Updated upstream
         user_history.append(assistant_input)
+=======
+        # 记录历史信息，下一轮会把历史信息一起给llm
+        user_history.append(assistant_input)
+        # 输出本轮记录的历史信息，方便检查，后续可在日志中删除
+>>>>>>> Stashed changes
         logger.info(f'memory renewed: {user_history}')
 
         # 更新最后活动时间
@@ -78,7 +143,11 @@ class Chatchain():
 
         return reply
 
+<<<<<<< Updated upstream
     async def create_stream_chat_session(self, message, content, session_id,llm): #流式传输的对话构建
+=======
+    async def create_stream_chat_session(self, message, content, session_id,llm): #流式传输的对话构建，和非流式是一样的
+>>>>>>> Stashed changes
         client, model = await load_async_llm(llm)
         max_tokens = 100
         user_history = self.get_chat_history(session_id)
@@ -87,13 +156,32 @@ class Chatchain():
         prompt = prompts.get(llm, "")  # 如果llm在prompts中没有配置，则默认为空字符串
         system_content = f"{prompt}\n{content}"  # 使用格式化字符串拼接
 
+<<<<<<< Updated upstream
         # 系统消息，只在第一次对话时添加
+=======
+        current_model = None
+
+       # 系统消息，只在第一次对话时添加
+>>>>>>> Stashed changes
         if len(user_history) == 0:
             system_input = {
                 "role": "system",
                 "content": system_content
             }
             user_history.append(system_input)
+<<<<<<< Updated upstream
+=======
+            current_model = llm #记录当前模型
+        else:
+            # 如果模型发生变化，更新系统提示词
+            if current_model != llm:
+                # 替换历史记录中的系统提示词
+                user_history[0] = {
+                    "role": "system",
+                    "content": system_content
+                }
+                current_model = llm
+>>>>>>> Stashed changes
 
 
         user_input = {
@@ -179,11 +267,23 @@ class Chatchain():
             self.logger.info("-" * 50)  # 分隔线
 
 async def stats_context(chatchain, interval_minutes=1):
+<<<<<<< Updated upstream
+=======
+    '''
+    一些佬编的对话状态相关函数，应该是间隔1分钟打印一次会话状态
+    '''
+>>>>>>> Stashed changes
     while True:
         await asyncio.sleep(interval_minutes * 60)
         chatchain.print_session_stats()
 
 async def periodic_cleanup(chatchain, interval_minutes=5):
+<<<<<<< Updated upstream
+=======
+    '''
+    5分钟清理不活跃会话
+    '''
+>>>>>>> Stashed changes
     while True:
         await asyncio.sleep(interval_minutes * 60)
         chatchain.clean_inactive_sessions()

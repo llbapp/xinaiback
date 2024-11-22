@@ -1,3 +1,7 @@
+# 这个模块的主要功能是搭建网页demo，不知道啥原因现在运行不起来
+
+
+
 import streamlit as st
 import asyncio
 import websockets
@@ -42,7 +46,7 @@ chat_output = st.empty()  # 用于动态更新输出
 # 调用 WebSocket
 async def send_message():
     st.session_state["full_response"] = ""  # 每次对话清空之前的内容
-    async with websockets.connect("ws://localhost:6006/stream_chat") as websocket:
+    async with websockets.connect("wss://u429062-9a89-36a04f5b.westb.seetacloud.com:8443/stream_chat") as websocket:
         init_message = json.dumps({
             "user_id": st.session_state.x_session_id,
             "query": query.strip(),
