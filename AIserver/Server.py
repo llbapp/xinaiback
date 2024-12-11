@@ -133,9 +133,9 @@ async def stream_chat(websocket: WebSocket):
             break
 
 
-# def save_to_excel(qa_list):
-#     df = pd.DataFrame(qa_list, columns=['User Query', 'AI Response'])
-#     df.to_excel('chat_history.xlsx', index=False)
+def save_to_excel(qa_list):
+    df = pd.DataFrame(qa_list, columns=['User Query', 'AI Response'])
+    df.to_excel('chat_history.xlsx', index=False)
 
 if __name__ == "__main__":
     import uvicorn

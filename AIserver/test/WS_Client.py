@@ -3,11 +3,7 @@ import aiohttp
 import websockets
 import json
 
-<<<<<<< Updated upstream
-WS_URL = "ws://localhost:6000"
-=======
 WS_URL = "ws://localhost:6006"
->>>>>>> Stashed changes
 
 
 async def test_stream_chat():
